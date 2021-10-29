@@ -71,14 +71,17 @@ module.exports = async function sanitizeParams(collection, params) {
   // The query must always include the paginatedField so we can construct the cursor.
   if (params.fields) {
     params.fields = _.extend(
-      {
-        _id: 0, // Mongo includes this field by default, so don't request it unless the user wants it.
-      },
       params.fields
     );
 
+    Object.keys(params.fields).forEach(k => {
+      if(params.fields[k] === 1 || params.fields[k] === undefined || params.fields[k] === null) {
+        delete params.fields[k];
+      }
+    })
+
     if (!params.fields[params.paginatedField]) {
-      params.fields[params.paginatedField] = 1;
+      delete params.fields[params.paginatedField]
     }
   }
 

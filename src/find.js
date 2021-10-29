@@ -28,7 +28,7 @@ const config = require('./config');
  *    -hint {String} An optional index hint to provide to the mongo query
  */
 module.exports = async function(collection, params) {
-  const removePaginatedFieldInResponse = params.fields && !params.fields[params.paginatedField];
+  const removePaginatedFieldInResponse = params.fields && params.fields[params.paginatedField] === 0;
 
   params = _.defaults(await sanitizeParams(collection, params), { query: {} });
   const cursorQuery = generateCursorQuery(params);
@@ -38,7 +38,7 @@ module.exports = async function(collection, params) {
   // https://www.npmjs.com/package/mongoist#cursor-operations
   const findMethod = collection.findAsCursor ? 'findAsCursor' : 'find';
 
-  const query = collection[findMethod]({ $and: [cursorQuery, params.query] }, params.fields);
+  const query = collection[findMethod]({ $and: [cursorQuery, params.query] }).project(params.fields);
 
   /**
    * IMPORTANT
